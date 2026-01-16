@@ -1,0 +1,143 @@
+// ==UserScript==
+// @name         图寻辅助
+// @version      1.0
+// @description
+// @match        *://tuxun.fun/*
+// @author       Yu
+// @license
+// @icon         data:image/vnd.microsoft.icon;base64,AAABAAEAICAAAAEAIACoEAAAFgAAACgAAAAgAAAAQAAAAAEAIAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAD////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////+/v//3O3//+Hv////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////+fz//6TR//9BoP//R6P//6/X///6/f////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////n8//+Xyv//L5f//yeT//8nk///MZj//5nL///5/P/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////9/v//ns7//y+X//8olP//KZT//ymU//8ok///L5b//57O///9/v///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////7rc//82mv//KJP//ymU//8plP//KZT//ymU//8ok///Npr//7rc///////////////////////////////////////////////////////////////////////////////////////////////////////////////////e7v//TKX//yeT//8plP//KZT//ymU//8plP//KZT//ymU//8nk///TKX//97u////////////////////////////////////////////////////////////////////////////////////////////////////////+vz//3u9//8nk///KZT//ymU//8plP//KZT//ymU//8plP//KZT//ymU//8nk///e73///r8//////////////////////////////////////////////////////////////////////////////////////////////////+/3///M5n//yiU//8plP//KZT//ymU//8plP//KZT//ymU//8plP//KZT//yiU//8zmf//v9//////////////////////////////////////////////////////////////////////////////////////////////9fr//2Wy//8mkv//KZT//ymU//8plP//KJP//yaT//8mk///KJP//ymU//8plP//KZT//yaS//9lsv//9fr///////////////////////////////////////////////////////////////////////////////////////++3v//MJf//yiU//8plP//KJP//ymU//8/nv//U6j//1Go//87nf//KJP//yiU//8plP//KJT//zCY///A3///////////////////////////////////////////////////////////////////////////////////+/3//3O4//8mkv//KZT//yeT//86nP//l8r//97u///x+P//8ff//9ns//+Mxf//M5r//yiT//8plP//JpL//3q8///9/v/////////////////////////////////////////////////////////////////////////////e7v//P5///yiT//8olP//NZr//7XZ//////////////////////////////z+//+i0f//L5f//yiU//8nk///SaT//+n0/////////////////////////////////////////////////////////////////////////////7vc//8slf//KZT//yaT//97vf///P3///////////////////////////////////f6//9qtP//JpP//yiU//8ymf//zeX/////////////////////////////////////////////////////////////////////////////p9L//yiT//8plP//LJX//7nb/////////////////////////////////////////////6XS//8olP//KZT//yuV//+52/////////////////////////////////////////////////////////////////////////////+m0f//KJP//yiU//8xmP//yuT/////////////////////////////////////////////ttr//yqV//8plP//K5X//7jb/////////////////////////////////////////////////////////////////////////////7vd//8slv//KZT//yuV//+12v////////////////////////////////////////////+h0P//KJP//yiU//8zmf//zeX/////////////////////////////////////////////////////////////////////////////4O///0Cg//8nk///JpP//3W5///5/P//////////////////////////////////8/n//2Ox//8mk///J5P//06m///s9f/////////////////////////////////////////////////////////////////////////////8/f//e7z//yaS//8olP//Mpj//6vU///9/v////////////////////////r8//+azP//LZb//ymU//8nk///jsb////////////////////////////////////////////////////////////////////////////////////////U6f//QaD//yeT//8ok///Npr//4nD///S6P//6vT//+n0///N5v//fr7//zGX//8olP//JpP//02l///h8P////////////////////////////////////////////////////////////////////////////////////////////+w1///Npr//yeT//8olP//J5P//zab//9Io///R6L//zSa//8nk///KJT//yaT//89nf//v97///////////////////////////////////////////////////////////////////////////////////////////////////3+//+y2P//RKH//yaS//8nk///KJP//yeT//8nk///KJP//yaT//8mk///TKX//7/e///+/////////////////////////////////////////////////////////v/////////////////////////////////////////////////////a7P//hsL//0uk//8ymP//KpX//yuV//80mf//Tqb//47G///h8P/////////////////////////////////////////////////////////////////8///////////////////////////////////////////////////////////9/v//6vT//8zl//+42///udz//8/m///t9f///v7///////////////////////////////////////////////////////////////////////7//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////v//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+// @run-at
+// ==/UserScript==
+
+(function() {
+    'use strict';
+    let _i = null, _l = null, _t, _tm;
+    const _k = '_tx_k', _m = '_tx_s';
+
+    function _init() {
+        let s = localStorage.getItem(_m);
+        if (!s) {
+            if (confirm("请选择地图源：\n\n确定：使用高德 (需输入Key，免费)\n取消：使用OSM (国内不可用，要魔法)")) {
+                localStorage.setItem(_m, '1');
+                _chk();
+            } else {
+                localStorage.setItem(_m, '0');
+            }
+        } else if (s === '1') {
+            _chk();
+        }
+    }
+
+    function _chk() {
+        if (!localStorage.getItem(_k)) {
+            let k = prompt("请输入高德地图Web服务API Key (32位)\n\n提示：后续如需修改或重置，请在游戏中按 'R' 键。", "");
+            if (k && k.length === 32) {
+                localStorage.setItem(_k, k);
+                alert("Key已保存，请刷新页面生效。");
+            } else {
+                localStorage.removeItem(_m);
+                alert("Key无效或取消，已重置设置。");
+            }
+        }
+    }
+    _init();
+
+    const _u = async () => {
+        if (!_l) return;
+        let r = '位置获取中...', g = '';
+        try {
+            const isG = localStorage.getItem(_m) === '1';
+            const k = localStorage.getItem(_k);
+            if (isG && k) {
+                r = await _gd(_l.lat, _l.lng, k);
+            } else {
+                r = await _os(_l.lat, _l.lng);
+            }
+            if (_i) {
+               if (_l.p === 'b') { const b = await _bd(_i); if(b) g = b; }
+               else if (_l.p === 't') { const t = await _qq(_i); if(t) g = t; }
+               else if (_l.str) { g = _l.str; }
+            }
+        } catch (e) {}
+
+        console.clear();
+        console.log(`%c📍 ${r} ${g ? '('+g+')' : ''}`, 'font-size:20px;color:#00d1b2;font-weight:bold;padding-bottom:10px;');
+        console.log(`%c💬 QQ群: 1080091589\n✈️ TG: t.me/tuxunScript`, 'font-size:13px;color:#ff3860;line-height:1.5;');
+    };
+
+    const _d = () => { clearTimeout(_tm); _tm = setTimeout(_u, 500); };
+
+    const X = XMLHttpRequest.prototype.send;
+    XMLHttpRequest.prototype.send = new Proxy(X, {
+        apply: (t, ctx, a) => {
+            ctx.addEventListener('load', () => {
+                if (!ctx.responseText || !ctx.responseURL) return;
+                try {
+                    const d = JSON.parse(ctx.responseText);
+                    let ni = null, np = null;
+
+                    if (ctx.responseURL.includes('GetMetadata')) {
+                        try {
+                            const m = d[1][0];
+                            ni = m[1][1];
+                            np = { lat: m[5][0][1][0][2], lng: m[5][0][1][0][3], p: 'g', str: (m[3][2][0] && m[3][2][0][0]) || '' };
+                        } catch(e){}
+                    } else if (ctx.responseURL.match(/getPanoInfo|getQQPanoInfo/)) {
+                        if (d && d.data) {
+                            ni = d.data.pano;
+                            np = { lat: d.data.lat, lng: d.data.lng, p: ctx.responseURL.includes('getQQ') ? 't' : 'b' };
+                        }
+                    }
+
+                    if (ni && ni !== _i) {
+                        _i = ni; _l = np;
+                        _d();
+                    }
+                } catch (e) {}
+            });
+            return Reflect.apply(t, ctx, a);
+        }
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (['INPUT','TEXTAREA'].includes(e.target.tagName) || e.target.isContentEditable) return;
+        const k = e.key.toLowerCase();
+        if (k === 'i') { _u(); }
+        if (k === 'r') {
+            localStorage.removeItem(_m);
+            localStorage.removeItem(_k);
+            alert('设置已重置！请刷新页面重新配置。');
+        }
+    }, true);
+
+    function _gd(lt, ln, k) {
+        return fetch(`https://restapi.amap.com/v3/geocode/regeo?output=json&location=${ln},${lt}&key=${k}&radius=100`)
+            .then(r => r.json()).then(d => {
+                if (d.status === '1' && d.regeocode) {
+                    const c = d.regeocode.addressComponent;
+                    return [c.province, c.city, c.district, c.township].filter(x => x && typeof x === 'string').join('');
+                }
+                return '未知(Key无效?)';
+            }).catch(() => '请求失败');
+    }
+
+    function _os(lt, ln) {
+        return fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lt}&lon=${ln}&accept-language=cn`)
+            .then(r => r.json()).then(d => d.display_name ? d.display_name.split(',').reverse().slice(0,4).join('') : '未知')
+            .catch(() => 'OSM请求失败(需魔法)');
+    }
+
+    async function _bd(id) {
+        try { const r = await fetch(`https://mapsv0.bdimg.com/?qt=sdata&sid=${id}`); const d = await r.json(); return d.content?.[0]?.Rname || ''; } catch { return ''; }
+    }
+
+    function _qq(id) {
+        return new Promise(r => {
+            fetch(`https://sv.map.qq.com/sv?svid=${id}&output=json`).then(x => x.blob()).then(b => {
+                const rd = new FileReader();
+                rd.onload = () => { try { const j = JSON.parse(rd.result); r(j?.detail?.basic?.append_addr || ''); } catch { r(''); } };
+                rd.readAsText(b, 'GBK');
+            }).catch(() => r(''));
+        });
+    }
+})();
